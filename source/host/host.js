@@ -5,7 +5,8 @@ const { readFile } = require('fs').promises;
 const express = require('express');
 const cors = require('cors');
 
-const nodeCmd = require('node-cmd');
+const { keyboard, Key } = require('@nut-tree/nut-js');
+keyboard.config.autoDelayMs = 5;
 
 
 
@@ -69,7 +70,7 @@ function getIPAddress() {
 
 
 let IP_ADDRESS = 'No Router';
-let PORT = 80;
+let PORT = 6969;
 
 
 
@@ -114,10 +115,27 @@ expressApp.get('/', (request, response) => {
 expressApp.post('/input', async (request, response) => {
     console.log(request.body);
 
-    nodeCmd.run(
-        `balcon.exe -n "IVONA 2 Amy OEM" -t "${request.body}" -s 0 -v 100`, 
-        (err, data, stderr) => console.log(data)
-    );
+    await keyboard.type(request.body);
 
     response.sendStatus(200);
 });
+
+expressApp.post('/enter', async (request, response) => {
+    console.log('Enter');
+
+    await keyboard.pressKey(Key.Enter);
+    await keyboard.releaseKey(Key.Enter);
+
+    response.sendStatus(200);
+});
+
+
+expressApp.post('/backspace', async (request, response) => {
+    console.log('Backspace');
+
+    await keyboard.pressKey(Key.Backspace);
+    await keyboard.releaseKey(Key.Backspace);
+
+    response.sendStatus(200);
+});
+
