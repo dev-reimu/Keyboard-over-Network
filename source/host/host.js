@@ -1,7 +1,6 @@
 const { app: electronApp, Menu, Tray } = require('electron');
 const path = require('path');
 
-const { readFile } = require('fs').promises;
 const express = require('express');
 const cors = require('cors');
 
@@ -23,7 +22,7 @@ electronApp.whenReady().then(() => {
 
     // Network
     checkConnectionStatus();
-    setInterval(() => { 
+    setInterval(() => {
         checkConnectionStatus();
         setTray();
     }, 10000);
