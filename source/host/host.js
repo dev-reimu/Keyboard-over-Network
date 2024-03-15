@@ -5,7 +5,7 @@ const express = require('express');
 const cors = require('cors');
 
 const { keyboard, Key } = require('@nut-tree/nut-js');
-keyboard.config.autoDelayMs = 5;
+keyboard.config.autoDelayMs = 10;
 
 
 
