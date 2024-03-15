@@ -1,11 +1,11 @@
 {
-  "name": "phone-keyboard-to-desktop-computer",
+  "name": "keyboard-over-network",
   "version": "1.0.0",
   "main": "source/host/host.js",
   "scripts": {
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "electron-packager ."
+    "build": "electron-packager . --all"
   },
   "keywords": [],
   "author": "dev_reimu",
