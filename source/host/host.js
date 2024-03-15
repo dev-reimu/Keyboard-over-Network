@@ -1,4 +1,4 @@
-const { app, Menu, Tray } = require('electron');
+const { app: electronApp, Menu, Tray } = require('electron');
 const path = require('path');
 
 const { readFile } = require('fs').promises;
@@ -12,36 +12,37 @@ keyboard.config.autoDelayMs = 5;
 
 
 
-const expressApp = express();
-expressApp.use(express.text());
-expressApp.use(express.urlencoded({ extended: true }));
-expressApp.use(express.static(path.join(__dirname, '../client')));
-expressApp.use( cors({ origin: '*' }) );
-
-
-
-
-
-let icon = '';
 let tray = null;
 
-app.whenReady().then(() => {
-    icon = path.join(__dirname, '../../images/icon.png');
+electronApp.whenReady().then(() => {
+    // Tray
+    const icon = path.join(__dirname, '../../images/icon.png');
     tray = new Tray(icon);
-    tray.setToolTip('Phone Keyboard to Balabolka');
-    
+    tray.setToolTip('Keyboard over Network');   
     setTray();
+
+    // Network
+    checkConnectionStatus();
+    setInterval(() => { 
+        checkConnectionStatus();
+        setTray();
+    }, 10000);
+
+    // App
+    startExpressApp();
 });
 
 
 
 
 
+// Tray
+
 function setTray() {
     const contextMenu = Menu.buildFromTemplate([ 
         { label: `IP: ${IP_ADDRESS}` }, 
         { label: `PORT: ${PORT}` }, 
-        { label: 'Shutdown', click: () => app.exit() }
+        { label: 'Shutdown', click: () => electronApp.exit() }
     ]);
     
     tray.setContextMenu(contextMenu);
@@ -50,6 +51,11 @@ function setTray() {
 
 
 
+
+// Network
+
+let IP_ADDRESS = 'No Router';
+let PORT = 6969;
 
 function getIPAddress() {
     var interfaces = require('os').networkInterfaces();
@@ -65,27 +71,6 @@ function getIPAddress() {
     return '0.0.0.0';
 }
 
-
-
-
-
-let IP_ADDRESS = 'No Router';
-let PORT = 6969;
-
-
-
-
-
-checkConnectionStatus();
-setInterval(() => { 
-    checkConnectionStatus();
-    setTray();
-}, 10000);
-
-
-
-
-
 function checkConnectionStatus() {
     let NEW_IP_ADDRESS = getIPAddress();
 
@@ -100,42 +85,54 @@ function checkConnectionStatus() {
     }
 
     IP_ADDRESS = NEW_IP_ADDRESS;
-    expressApp.listen(PORT, IP_ADDRESS, () => console.log(`App available at http://${IP_ADDRESS}:${PORT}.`));
+    if (expressApp) {
+        expressApp.listen(PORT, IP_ADDRESS, () => console.log(`App available at http://${IP_ADDRESS}:${PORT}.`));
+    }
     return true;
 }
 
 
 
 
+let expressApp;
 
-expressApp.get('/', (request, response) => {
-    response.sendFile(path.join(__dirname, '../client/client.html'), 'text/html');
-});
+function startExpressApp() {
+    expressApp = express();
+    expressApp.use(express.text());
+    expressApp.use(express.urlencoded({ extended: true }));
+    expressApp.use(express.static(path.join(__dirname, '../client')));
+    expressApp.use( cors({ origin: '*' }) );
 
-expressApp.post('/input', async (request, response) => {
-    console.log(request.body);
+    expressApp.listen(PORT, IP_ADDRESS, () => console.log(`App available at http://${IP_ADDRESS}:${PORT}.`));
 
-    await keyboard.type(request.body);
-
-    response.sendStatus(200);
-});
-
-expressApp.post('/enter', async (request, response) => {
-    console.log('Enter');
-
-    await keyboard.pressKey(Key.Enter);
-    await keyboard.releaseKey(Key.Enter);
-
-    response.sendStatus(200);
-});
-
-
-expressApp.post('/backspace', async (request, response) => {
-    console.log('Backspace');
-
-    await keyboard.pressKey(Key.Backspace);
-    await keyboard.releaseKey(Key.Backspace);
-
-    response.sendStatus(200);
-});
-
+    expressApp.get('/', (request, response) => {
+        response.sendFile(path.join(__dirname, '../client/client.html'), 'text/html');
+    });
+    
+    expressApp.post('/input', async (request, response) => {
+        console.log(request.body);
+    
+        await keyboard.type(request.body);
+    
+        response.sendStatus(200);
+    });
+    
+    expressApp.post('/enter', async (request, response) => {
+        console.log('Enter');
+    
+        await keyboard.pressKey(Key.Enter);
+        await keyboard.releaseKey(Key.Enter);
+    
+        response.sendStatus(200);
+    });
+    
+    
+    expressApp.post('/backspace', async (request, response) => {
+        console.log('Backspace');
+    
+        await keyboard.pressKey(Key.Backspace);
+        await keyboard.releaseKey(Key.Backspace);
+    
+        response.sendStatus(200);
+    });
+}
