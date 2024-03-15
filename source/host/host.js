@@ -17,11 +17,11 @@ electronApp.whenReady().then(() => {
     // Tray
     const icon = path.join(__dirname, '../../images/icon.png');
     tray = new Tray(icon);
-    tray.setToolTip('Keyboard over Network');   
-    setTray();
+    tray.setToolTip('Keyboard over Network');
 
     // Network
     checkConnectionStatus();
+    setTray();
     setInterval(() => {
         checkConnectionStatus();
         setTray();
