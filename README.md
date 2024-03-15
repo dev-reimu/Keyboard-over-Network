@@ -1,3 +1,3 @@
 # Keyboard-over-Network
  
-Simply connect to the device running the Keyboard-over-Network binary IP address, with the port 6969, in the browser of another device.
+Simply open the browser on your phone (for example), and connect to the IP address of the device running the binary, on port 6969.
